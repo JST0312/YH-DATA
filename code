@@ -1,0 +1,91 @@
+for label in response['Labels']:
+    print ("Label: " + label['Name'])
+    print ("Confidence: " + str(label['Confidence']))
+    print ("Instances:")
+    for instance in label['Instances']:
+        print ("  Bounding box")
+        print ("    Top: " + str(instance['BoundingBox']['Top']))
+        print ("    Left: " + str(instance['BoundingBox']['Left']))
+        print ("    Width: " +  str(instance['BoundingBox']['Width']))
+        print ("    Height: " +  str(instance['BoundingBox']['Height']))
+        print ("  Confidence: " + str(instance['Confidence']))
+        print()
+
+    print ("Parents:")
+    for parent in label['Parents']:
+        print ("   " + parent['Name'])
+    print ("----------")
+    print ()
+
+
+----------------------
+
+import numpy as np
+from google.colab import files
+from tensorflow.keras.preprocessing import image
+
+uploaded = files.upload()
+
+for fn in uploaded.keys() :
+  path = '/content/' + fn
+  img = image.load_img(path, target_size=(300,300))
+  x = image.img_to_array(img) / 255.0
+  print(x)
+  print(x.shape)
+
+  x = np.expand_dims(x, axis = 0)
+
+  print(x.shape)
+
+  images = np.vstack( [x] )
+  classes = model.predict( images, batch_size = 10 )
+  
+  print(classes)
+
+  if classes[0] > 0.5 :
+    print(fn + " is a human")
+  else :
+    print(fn + " is a horse")
+
+----------
+
+import matplotlib.pyplot as plt
+def plot_history(history) :
+  hist = pd.DataFrame(history.history)
+  hist['epoch'] = history.epoch
+
+  plt.figure(figsize = (8, 12))
+
+  plt.subplot(2, 1, 1)
+  plt.xlabel('Eopoch')
+  plt.ylabel('Mean Abs Error [MPG]')
+  plt.plot(hist['epoch'], hist['mae'], label = 'Train Error')
+  plt.plot(hist['epoch'], hist['val_mae'], label = 'Val Error')
+  plt.ylim([0,5])
+  plt.legend()
+
+  plt.subplot(2, 1, 2)
+  plt.xlabel('Eopoch')
+  plt.ylabel('Mean Squared Error [MPG]')
+  plt.plot(hist['epoch'], hist['mse'], label = 'Train Error')
+  plt.plot(hist['epoch'], hist['val_mse'], label = 'Val Error')
+  plt.ylim([0,20])
+  plt.legend()
+
+  plt.show()
+
+
+---------------
+
+plt.figure(figsize=[12,8])
+plt.scatter(X.values[y_pred == 0, 0], X.values[y_pred == 0, 1], s = 100, c = 'red', label = 'Cluster 1')
+plt.scatter(X.values[y_pred == 1, 0], X.values[y_pred == 1, 1], s = 100, c = 'blue', label = 'Cluster 2')
+plt.scatter(X.values[y_pred == 2, 0], X.values[y_pred == 2, 1], s = 100, c = 'green', label = 'Cluster 3')
+plt.scatter(X.values[y_pred == 3, 0], X.values[y_pred == 3, 1], s = 100, c = 'cyan', label = 'Cluster 4')
+plt.scatter(X.values[y_pred == 4, 0], X.values[y_pred == 4, 1], s = 100, c = 'magenta', label = 'Cluster 5')
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], s = 300, c = 'yellow', label = 'Centroids')
+plt.title('Clusters of customers')
+plt.xlabel('Annual Income (k$)')
+plt.ylabel('Spending Score (1-100)')
+plt.legend()
+plt.show()

@@ -1,0 +1,242 @@
+-- 2개 테이블을 하나로 합치세요. 
+select *
+from orders
+join customers
+on orders.customer_id = customers.id ;
+
+select *
+from orders as o
+join customers as c
+on o.customer_id = c.id ;
+
+select *
+from orders o
+join customers c
+on o.customer_id = c.id ;
+
+-- 두 테이블 합쳐서, 주문아이디, 주문날짜, 금액, 고객아이디, 고객이메일 
+-- 을 가져오시오.
+select o.id,  o.order_date, o.amount, c.id as c_id, c.email
+from orders o
+join customers c
+on o.customer_id = c.id;
+
+-- 주문데이터를 가져오되, 주문시간을 최신순으로 해서, 금액이 300달러 
+-- 이상인 데이터만 가져오시오. 데이터는 주문아이디, 주문날짜, 금액,
+-- 고객의 이메일주소가 나오도록 가져오시오.
+select o.id, o.order_date, o.amount, c.email
+from orders o
+join customers c
+on o.customer_id = c.id
+where amount >= 300
+order by order_date desc;
+
+-- 모든 고객 데이터를 기준으로, 주문정보를 붙여주세요. 
+-- 어떤고객은 주문을 안했는지 확인이 가능함. 
+select *
+from customers c
+left join orders o
+on c.id = o.customer_id ;
+
+-- 각 고객별로, 주문 갯수를 나타내시오. 
+select c.first_name, c.last_name ,count(o.id) as order_count
+from customers c 
+left join orders o 
+on c.id = o.customer_id
+group by c.id;
+
+-- 주문 금액이 600달러보다 큰 사람들한테, 프로모션 이메일을 
+-- 보내려고 한다. 따라서, 600달러보다 큰 사람들의 이메일을 가져오시오.
+select distinct c.email
+from orders o 
+join customers c 
+on o.customer_id = c.id
+where o.amount > 600;
+
+-- 각 고객별로 주문 금액 평균이 300달러 이상인 사람의 이름과, 평균금액을 
+-- 가져오시오.
+select  c.first_name, c.last_name , avg( o.amount ) as amount
+from orders o 
+join customers c 
+on o.customer_id = c.id
+group by c.id
+having avg( o.amount ) >= 300;
+
+-- 오더테이블에는 주문날짜가 들어있는데, 날짜가 언제부터 언제까지인지
+-- 두개 날짜를 확인해 주세요.
+select min(order_date) , max(order_date)
+from orders;
+
+-- 2019년 12월 20일부터 2020년 1월 10일 사이에 주문한 사람은 몇명일까요?
+select count( distinct customer_id )
+from orders
+where order_date >= '2019-12-20' and order_date <= '2020-01-10';
+
+-- 2019년 12월 20일부터 2020년 1월 10일 사이의 주문 데이터에서,
+-- 고객별 주문금액이 평균 300달러 이상되는 사람의
+-- 이름과, 평균주문금액을 표시하세요.
+select c.first_name, c.last_name, avg(o.amount) as avg_amount
+from orders o 
+join customers c
+on o.customer_id = c.id
+where o.order_date between '2019-12-20' and '2020-01-10'
+group by c.id
+having avg_amount >= 300
+order by avg_amount desc
+limit 7 ;
+
+-- 1번 고객이 주문한 주문데이터를 모두 가져오세요.
+-- 1번 고객의 이름과 이메일도 함께 나오게 가져오세요.
+select o.* , c.first_name, c.last_name, c.email
+from customers c
+left join orders o
+on c.id = o.customer_id
+where c.id = 1
+order by o.order_date desc;
+
+-- 1번 고객이 회원 탈퇴하였다. 따라서 1번 고객을 고객테이블에서 삭제한다.
+-- 삭제한 후에도, 주문 테이블에는 1번 고객에 대한 정보가 남아있게 된다. 
+delete from customers
+where id = 1;
+
+select * 
+from orders
+where customer_id = 1;
+
+delete from orders
+where customer_id = 1;
+
+select * from customers
+where id = 2;
+
+select * 
+from orders
+where customer_id = 2;
+
+delete from customers
+where id = 2;
+
+
+
+
+
+
+
+
+select * from students;
+
+select * from papers;
+
+
+select s.first_name, p.title, p.grade
+from papers p
+join students s 
+on p.student_id = s.id
+order by p.grade desc ;
+
+
+select s.first_name, p.title, p.grade
+from students s 
+left join papers p 
+on s.id = p.student_id;
+-- null 을 다른 값으로 대체하는 방법 ifnull() 함수 이용.
+select s.first_name, 
+	   ifnull(p.title , 'MISSING'), 
+       ifnull(p.grade ,  0 )
+from students s 
+left join papers p 
+on s.id = p.student_id;
+
+
+select s.first_name, ifnull( avg(p.grade) , 0 ) as average
+from students s 
+left join papers p 
+on s.id = p.student_id
+group by s.id;
+
+
+select s.first_name, 
+       ifnull( avg(p.grade) , 0 ) as average ,
+       if( ifnull( avg(p.grade) , 0 ) >= 75 , 'PASSING' , 'FAILING' ) as passing_status
+from students s 
+left join papers p 
+on s.id = p.student_id
+group by s.id
+order by average desc ;
+
+
+
+
+------------
+
+select * from series;
+
+select * from reviewers;
+
+select * from reviews;
+
+
+select s.title, r.rating 
+from series s 
+join reviews r
+on s.id = r.series_id;
+   
+select s.title ,avg(r.rating) as avg_rating
+from series s 
+join reviews r 
+on s.id = r.series_id
+group by s.id
+order by avg_rating;
+
+select rv.first_name, rv.last_name, r.rating
+from reviewers rv 
+join reviews r 
+on rv.id = r.reviewer_id;
+
+   
+select s.title as unreviewed_series
+from series s 
+left join reviews r 
+on s.id = r.series_id
+where r.id is null ;
+
+select s.genre , avg(r.rating)  as avg_rating
+from reviews r 
+join series s 
+on r.series_id = s.id
+group by s.genre;
+   
+   
+select rv.first_name, rv.last_name , count(r.id) as COUNT, 
+       ifnull( min(r.rating) , 0) as MIN  , 
+       ifnull( max(r.rating) , 0) as MAX  , 
+       ifnull( avg(r.rating) , 0) as AVG  , 
+       if( count(r.id) = 0 , 'INACTIVE', 'ACTIVE' ) as STATUS
+from reviewers rv
+left join reviews r    
+on rv.id = r.reviewer_id
+group by rv.id;
+   
+
+select s.title, r.rating, 
+       concat(rv.first_name, ' ',rv.last_name) as reviewer
+from reviews r
+join series s 
+on r.series_id = s.id
+join reviewers rv
+on r.reviewer_id = rv.id;
+
+
+select *
+from reviews r
+join series s 
+on r.series_id = s.id and r.reviewer_id = 1 
+join reviewers rv 
+on r.reviewer_id = rv.id and r.rating > 8;
+
+-- 저랑 같이할 DB는 instar_db 라고 새로 스키마(데이터베이스)만들고 합니다.
+
+
+
+   
+   
